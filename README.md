@@ -1,0 +1,2 @@
+# Destiny-2-Java-API
+A currently unfinished Java API wrapper for Destiny 2. The target is to include EVERYTHING! All endpoints and definitions. This wrapper does not download the manifest. One adwantage is, that the provided data is always up to date. Sadly, this type of definition handling only supports english, unlike the manifest, where you can choose bewtween different languages. Anyways this solution is simple and does not require database handling or handling of REALLY big Json's.
