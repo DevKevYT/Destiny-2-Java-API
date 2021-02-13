@@ -54,4 +54,9 @@ public class UserInfoCard extends DestinyEntity {
 		GetProfile getProfile = new GetProfile(membershipType, membershipId, components);
 		return getProfile;
 	}
+	
+	public GetProfile loadProfile(String accessToken, ProfileSetType... components) {
+		GetProfile getProfile = new GetProfile(accessToken, membershipType, membershipId, components);
+		return getProfile;
+	}
 }

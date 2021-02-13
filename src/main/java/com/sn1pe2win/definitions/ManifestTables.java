@@ -38,7 +38,9 @@ public enum ManifestTables {
 	
 	StatGroupDefinition("DestinyStatGroupDefinition"),
 	
-	FactionDefinition("DestinyFactionDefinition");
+	FactionDefinition("DestinyFactionDefinition"),
+	
+	ChecklistDefinition("DestinyChecklistDefinition");
 	
 	public final String definitionName;
 	

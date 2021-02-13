@@ -81,7 +81,7 @@ public class Gateway {
 		}
 	}
 	
-	public static Response<JsonObject> sendFullGet(String fullURL) {
+	public static Response<JsonObject> sendFullGet(String fullURL, String accessToken) {
 		URL obj;
 		HttpURLConnection con;
 		try {
@@ -94,6 +94,8 @@ public class Gateway {
 		}
 		
 		con.setRequestProperty("X-API-KEY", X_API_KEY);
+		if(accessToken != null) con.setRequestProperty("Authorization", "Bearer " + accessToken);
+		
 		int responseCode = 404;
 		String inputLine;
 		StringBuilder responseCollector = new StringBuilder();
@@ -129,9 +131,12 @@ public class Gateway {
 		return lastResponse;
 	}
 	
+	public static Response<JsonObject> sendGet(String url, String accessToken) {
+		return sendFullGet(API_ROOT_PATH + url, accessToken);
+	}
+	
 	public static Response<JsonObject> sendGet(String url) {
-		//if(X_API_KEY.isEmpty()) return new Response<JsonObject>(null, 500, "Missing X_API_KEY", "", 2102);
-		return sendFullGet(API_ROOT_PATH + url);
+		return sendFullGet(API_ROOT_PATH + url, null);
 	}
 	
 	public static Response<?> lastResponse() {

@@ -1,14 +1,17 @@
 package com.sn1pe2win.DestinyEntityObjects;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map.Entry;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.sn1pe2win.core.DestinyDateFormat;
 import com.sn1pe2win.core.DestinyEntity;
 import com.sn1pe2win.core.Response;
-import com.sn1pe2win.definitions.DestinyInventoryBucketDefinition;
+import com.sn1pe2win.definitions.DestinyChecklistDefinition;
 import com.sn1pe2win.definitions.MembershipType;
 
 public interface Profile {
@@ -17,7 +20,9 @@ public interface Profile {
 		NONE(0), 
 		PROFILES(100), 
 		VENDOR_RECEIPTS(101),
-		PROFILE_INVENTORIES(102);
+		PROFILE_INVENTORIES(102),
+		PROFILE_CURRENCIES(103),
+		PROFILE_PROGRESSION(104);
 		
 		public final int components;
 		private ProfileSetType(int components) {
@@ -157,63 +162,97 @@ public interface Profile {
 	
 	public class ProfileInventories extends Component {
 		
-		public class DestinyItemComponent extends DestinyEntity {
+		
+		@Override
+		protected void parseData(JsonObject obj) {
+		}
+		
+		public ItemComponent[] getItems() {
+			JsonArray arr = data.getAsJsonArray("items");
+			ItemComponent[] items = new ItemComponent[arr.size()];
+			for(int i = 0; i < arr.size(); i++) {
+				items[i] = new ItemComponent();
+				items[i].parse(arr.get(i).getAsJsonObject());
+			}
+			return items;
+		}
+	}
+	
+	public class ProfileCurrenciesComponent extends Component {
 
-			JsonObject obj = new JsonObject();
+		@Override
+		protected void parseData(JsonObject obj) {
+		}
+		
+		/**NOTE: This function may return an empty array, if the endpoint was
+		 * not called with authorisation.*/
+		public ItemComponent[] getItems() {
+			if(data == null) return new ItemComponent[] {};
+			
+			JsonArray arr = data.getAsJsonArray("items");
+			ItemComponent[] items = new ItemComponent[arr.size()];
+			for(int i = 0; i < arr.size(); i++) {
+				items[i] = new ItemComponent();
+				items[i].parse(arr.get(i).getAsJsonObject());
+			}
+			return items;
+		}
+	}
+	
+	public class ProfileProgressionComponent extends Component {
+
+		public class CheckList extends DestinyEntity {
+			
+			public class CheckListEntry {
+				
+				private long hashIdentifier = 0;
+				private boolean obtained = false;
+				
+				public long getHashIdentifier() {
+					return hashIdentifier;
+				}
+				
+				public boolean obtained() {
+					return obtained;
+				}
+			}
+			
+			JsonObject checklist;
+			private long hashIdentifier;
 			
 			@Override
 			public JsonObject getRawJson() {
-				return obj;
+				return checklist;
 			}
-
+			
 			@Override
 			public void parse(JsonObject object) {
-				this.obj = object;
+				this.checklist = object;
 			}
 			
-			public long getItemHash() {
-				return obj.getAsJsonPrimitive("itemHash").getAsLong();
+			public long getHashIdentifier() {
+				return hashIdentifier;
 			}
 			
-			public int getQuantity() {
-				return obj.getAsJsonPrimitive("quantity").getAsInt();
-			}
-			//TODO item enums
-			public int getBindStatus() {
-				return obj.getAsJsonPrimitive("bindStatus").getAsInt();
-			}
-			
-			public int getLocation() {
-				return obj.getAsJsonPrimitive("location").getAsInt();
-			}
-			
-			public int getState() {
-				return obj.getAsJsonPrimitive("state").getAsInt();
-			}
-			
-			public long getBucketHash() {
-				return obj.getAsJsonPrimitive("bucketHash").getAsLong();
+			public CheckListEntry[] getChecklistEntries() {
+				Object[] set = checklist.entrySet().toArray();
+				CheckListEntry[] checklist = new CheckListEntry[set.length];
+				
+				for(int i = 0; i < set.length; i++) {
+					@SuppressWarnings("unchecked")
+					Entry<String, JsonElement> entry = (Entry<String, JsonElement>) set[i];
+					checklist[i] = new CheckListEntry();
+					checklist[i].hashIdentifier = Long.valueOf(entry.getKey());
+					checklist[i].obtained = entry.getValue().getAsBoolean();
+					//This should be every character
+				}
+				
+				return checklist;
 			}
 			
 			@SuppressWarnings("unchecked")
-			public Response<DestinyInventoryBucketDefinition> getBucket() {
-				return (Response<DestinyInventoryBucketDefinition>) new DestinyInventoryBucketDefinition(obj.getAsJsonPrimitive("bucketHash").getAsLong()).getAsResponse();
-			}
-			
-			public int getTransferStatus() {
-				return obj.getAsJsonPrimitive("transferStatus").getAsInt();
-			}
-			
-			public boolean isLockable() {
-				return obj.getAsJsonPrimitive("lockable").getAsBoolean();
-			}
-			
-			public int getDismantlePermission() {
-				return obj.getAsJsonPrimitive("dismantlePermission").getAsInt();
-			}
-			
-			public boolean isWrapper() {
-				return obj.getAsJsonPrimitive("isWrapper").getAsBoolean();
+			public Response<DestinyChecklistDefinition> getChecklistDefinition() {
+				return (Response<DestinyChecklistDefinition>) new DestinyChecklistDefinition(hashIdentifier).getAsResponse();
 			}
 		}
 		
@@ -221,14 +260,26 @@ public interface Profile {
 		protected void parseData(JsonObject obj) {
 		}
 		
-		public DestinyItemComponent[] getItems() {
-			JsonArray arr = data.getAsJsonArray("items");
-			DestinyItemComponent[] items = new DestinyItemComponent[arr.size()];
-			for(int i = 0; i < arr.size(); i++) {
-				items[i] = new DestinyItemComponent();
-				items[i].parse(arr.get(i).getAsJsonObject());
+		public CheckList[] getChecklists() {
+			Object[] set = data.getAsJsonObject("checklists").entrySet().toArray();
+			ArrayList<CheckList> checklist = new ArrayList<CheckList>(set.length);
+			
+			for(int i = 0; i < set.length; i++) {
+				@SuppressWarnings("unchecked")
+				Entry<String, JsonElement> entry = (Entry<String, JsonElement>) set[i];
+				
+				if(!entry.getValue().getAsJsonObject().entrySet().isEmpty()) {
+					CheckList list = new CheckList();
+					list.hashIdentifier = Long.valueOf(entry.getKey());
+					list.parse(entry.getValue().getAsJsonObject());
+					checklist.add(list);
+				}
+				//This should be every character
 			}
-			return items;
+			
+			return checklist.toArray(new CheckList[checklist.size()]);
 		}
+		
+		//TODO seasonal artifact
 	}
 }

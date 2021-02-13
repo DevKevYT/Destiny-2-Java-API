@@ -4,7 +4,9 @@ import java.util.ArrayList;
 
 import com.google.gson.JsonObject;
 import com.sn1pe2win.DestinyEntityObjects.Profile.DestinyProfileComponent;
+import com.sn1pe2win.DestinyEntityObjects.Profile.ProfileCurrenciesComponent;
 import com.sn1pe2win.DestinyEntityObjects.Profile.ProfileInventories;
+import com.sn1pe2win.DestinyEntityObjects.Profile.ProfileProgressionComponent;
 import com.sn1pe2win.DestinyEntityObjects.Profile.ProfileSetType;
 import com.sn1pe2win.DestinyEntityObjects.Profile.VendorReceiptsComponent;
 import com.sn1pe2win.core.DestinyEntity;
@@ -22,8 +24,15 @@ public class GetProfile extends DestinyEntity {
 	private DestinyProfileComponent destinyprofileComponent;
 	private VendorReceiptsComponent vendorReceipts;
 	private ProfileInventories profileInventories;
+	private ProfileCurrenciesComponent profileCurrencies;
+	private ProfileProgressionComponent profileProgression;
 	
 	public GetProfile(MembershipType platform, long destinyMembershipid, ProfileSetType... loadType) {
+		this(null, platform, destinyMembershipid, loadType);
+	}
+	
+	/**Pass the access token, if you need to access protected recources.*/
+	public GetProfile(String accessToken, MembershipType platform, long destinyMembershipid, ProfileSetType... loadType) {
 		if(loadType.length == 0) loadType = new ProfileSetType[] { ProfileSetType.NONE };
 		
 		super.REQUEST_TYPE = "Destiny2.GetProfile";
@@ -33,7 +42,7 @@ public class GetProfile extends DestinyEntity {
 		loadTypeAsQueryString = loadTypeAsQueryString.substring(0, loadTypeAsQueryString.length()-1);
 		System.out.println(loadTypeAsQueryString);
 		
-		Response<JsonObject> obj = Gateway.sendGet("/Destiny2/" + platform.id +  "/Profile/"  + destinyMembershipid  + "/?" + loadTypeAsQueryString);
+		Response<JsonObject> obj = Gateway.sendGet("/Destiny2/" + platform.id +  "/Profile/"  + destinyMembershipid  + "/?" + loadTypeAsQueryString, accessToken);
 		if(obj.success()) parse(obj.getResponseData().getAsJsonObject("Response"));
 		
 		originalResponse = obj;
@@ -73,11 +82,24 @@ public class GetProfile extends DestinyEntity {
 			this.profileInventories.parse(profileInventories);
 		}
 		
+		JsonObject profileCurrencies = object.getAsJsonObject("profileCurrencies");
+		if(profileCurrencies != null) {
+			newTypes.add(ProfileSetType.PROFILE_CURRENCIES);
+			this.profileCurrencies = new ProfileCurrenciesComponent();
+			this.profileCurrencies.parse(profileCurrencies);
+		}
+		
+		JsonObject profileProgression = object.getAsJsonObject("profileProgression");
+		if(profileProgression != null) {
+			newTypes.add(ProfileSetType.PROFILE_PROGRESSION);
+			this.profileProgression = new ProfileProgressionComponent();
+			this.profileProgression.parse(profileProgression);
+		}
+		
 		components = newTypes.toArray(new ProfileSetType[newTypes.size()]);
 	}
 	
 	/**Profiles is the most basic component, only relevant when calling GetProfile. This returns basic information about the profile, which is almost nothing: a list of characterIds, some information about the last time you logged in, and that most sobering statistic: how long you've played.
-	 * 
 	 * @Nullable Not null, if the {@link GetProfile#components} contains {@link ProfileSetType#PROFILES}
 	 * <br>Check with {@link GetProfile#hasComponent(ProfileSetType)}*/
 	public DestinyProfileComponent getDestinyProfileComponent() {
@@ -88,14 +110,28 @@ public class GetProfile extends DestinyEntity {
 	 * @Nullable Not null, if the {@link GetProfile#components} contains {@link ProfileSetType#VENDOR_RECEIPTS}
 	 * <br>Check with {@link GetProfile#hasComponent(ProfileSetType)}*/
 	public VendorReceiptsComponent getVendorReceiptsComponent() {
-		return this.vendorReceipts;
+		return vendorReceipts;
 	}
 	
 	/**Asking for this will get you the profile-level inventories, such as your Vault buckets (yeah, the Vault is really inventory buckets located on your Profile)
 	 * @Nullable Not null, if the {@link GetProfile#components} contains {@link ProfileSetType#PROFILE_INVENTORIES}
 	 * <br>Check with {@link GetProfile#hasComponent(ProfileSetType)}*/
 	public ProfileInventories getProfileInventoryComponent() {
-		return this.profileInventories;
+		return profileInventories;
+	}
+	
+	/**This will get you a summary of items on your Profile that we consider to be "currencies", such as Glimmer. I mean, if there's Glimmer in Destiny 2. I didn't say there was Glimmer.
+	 * @Nullable Not null, if the {@link GetProfile#components} contains {@link ProfileSetType#PROFILE_INVENTORIES}
+	 * <br>Check with {@link GetProfile#hasComponent(ProfileSetType)}*/
+	public ProfileCurrenciesComponent getProfileCurrenciesComponent() {
+		return profileCurrencies;
+	}
+	
+	/**Returns progressions for the profile, such as region chests etc.
+	 * @Nullable Not null, if the {@link GetProfile#components} contains {@link ProfileSetType#PROFILE_INVENTORIES}
+	 * <br>Check with {@link GetProfile#hasComponent(ProfileSetType)}*/
+	public ProfileProgressionComponent getProfileProgression() {
+		return profileProgression;
 	}
 	
 	public boolean hasComponent(ProfileSetType component) {
