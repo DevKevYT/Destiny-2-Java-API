@@ -58,4 +58,8 @@ public abstract class DestinyEntity {
 			return constr;
 		}
 	}
+	
+	public String toString() {
+		return getRawJson() != null ? getRawJson().toString() : "null" ;
+	}
 }

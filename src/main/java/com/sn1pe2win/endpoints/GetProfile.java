@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.google.gson.JsonObject;
 import com.sn1pe2win.DestinyEntityObjects.Profile.DestinyProfileComponent;
+import com.sn1pe2win.DestinyEntityObjects.Profile.PlatformSilverComponent;
 import com.sn1pe2win.DestinyEntityObjects.Profile.ProfileCurrenciesComponent;
 import com.sn1pe2win.DestinyEntityObjects.Profile.ProfileInventories;
 import com.sn1pe2win.DestinyEntityObjects.Profile.ProfileProgressionComponent;
@@ -26,6 +27,7 @@ public class GetProfile extends DestinyEntity {
 	private ProfileInventories profileInventories;
 	private ProfileCurrenciesComponent profileCurrencies;
 	private ProfileProgressionComponent profileProgression;
+	private PlatformSilverComponent platformSilver;
 	
 	public GetProfile(MembershipType platform, long destinyMembershipid, ProfileSetType... loadType) {
 		this(null, platform, destinyMembershipid, loadType);
@@ -96,6 +98,13 @@ public class GetProfile extends DestinyEntity {
 			this.profileProgression.parse(profileProgression);
 		}
 		
+		JsonObject platformSilver = object.getAsJsonObject("platformSilver");
+		if(platformSilver != null) {
+			newTypes.add(ProfileSetType.PLATFORM_SILVER);
+			this.platformSilver = new PlatformSilverComponent();
+			this.platformSilver.parse(platformSilver);
+		}
+		
 		components = newTypes.toArray(new ProfileSetType[newTypes.size()]);
 	}
 	
@@ -132,6 +141,13 @@ public class GetProfile extends DestinyEntity {
 	 * <br>Check with {@link GetProfile#hasComponent(ProfileSetType)}*/
 	public ProfileProgressionComponent getProfileProgression() {
 		return profileProgression;
+	}
+	
+	/**Returns the silver on all platforms. Needs oauth
+	 * @Nullable Not null, if the {@link GetProfile#components} contains {@link ProfileSetType#PLATFORM_SILVER}
+	 * <br>Check with {@link GetProfile#hasComponent(ProfileSetType)}*/
+	public PlatformSilverComponent getPlatformSilver() {
+		return platformSilver;
 	}
 	
 	public boolean hasComponent(ProfileSetType component) {

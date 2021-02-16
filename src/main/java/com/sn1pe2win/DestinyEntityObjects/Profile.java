@@ -22,7 +22,8 @@ public interface Profile {
 		VENDOR_RECEIPTS(101),
 		PROFILE_INVENTORIES(102),
 		PROFILE_CURRENCIES(103),
-		PROFILE_PROGRESSION(104);
+		PROFILE_PROGRESSION(104),
+		PLATFORM_SILVER(105);
 		
 		public final int components;
 		private ProfileSetType(int components) {
@@ -256,6 +257,102 @@ public interface Profile {
 			}
 		}
 		
+		public class SeasonalArtifact extends DestinyEntity {
+			
+			public class SeasonalArtifactProgression extends DestinyEntity {
+				JsonObject object;
+				@Override
+				public JsonObject getRawJson() {
+					return object;
+				}
+
+				@Override
+				public void parse(JsonObject object) {
+					this.object = object;
+				}
+				
+				//TODO get progression definition
+				public long getProgressionHash() {
+					return object.getAsJsonPrimitive("progressionHash").getAsLong();
+				}
+				
+				public int getDailyProgress() {
+					return object.getAsJsonPrimitive("dailyProgress").getAsInt();
+				}
+				
+				public int getDailyLimit() {
+					return object.getAsJsonPrimitive("dailyLimit").getAsInt();
+				}
+				
+				public int getWeeklyProgress() {
+					return object.getAsJsonPrimitive("weeklyProgress").getAsInt();
+				}
+				
+				public int getWeeklyLimit() {
+					return object.getAsJsonPrimitive("weeklyLimit").getAsInt();
+				}
+				
+				public int getCurrentProgress() {
+					return object.getAsJsonPrimitive("currentProgress").getAsInt();
+				}
+				
+				public int getLevel() {
+					return object.getAsJsonPrimitive("level").getAsInt();
+				}
+				
+				public int getLevelCap() {
+					return object.getAsJsonPrimitive("levelCap").getAsInt();
+				}
+				
+				public int getStepIndex() {
+					return object.getAsJsonPrimitive("stepIndex").getAsInt();
+				}
+				
+				public int getProgressToNextLevel() {
+					return object.getAsJsonPrimitive("progressToNextLevel").getAsInt();
+				}
+				
+				public int getNextLevelAt() {
+					return object.getAsJsonPrimitive("nextLevelAt").getAsInt();
+				}
+			}
+			
+			JsonObject object;
+			@Override
+			public JsonObject getRawJson() {
+				return object;
+			}
+
+			@Override
+			public void parse(JsonObject object) {
+				this.object = object;
+			}
+			
+			public long getArtifactHash() {
+				return object.getAsJsonPrimitive("artifactHash").getAsLong();
+			}
+			
+			public int getPointsAquired() {
+				return object.getAsJsonPrimitive("pointsAcquired").getAsInt();
+			}
+			
+			public int getPowerbonus() {
+				return object.getAsJsonPrimitive("powerBonus").getAsInt();
+			}
+			
+			public SeasonalArtifactProgression getPointProgression() {
+				SeasonalArtifactProgression p = new SeasonalArtifactProgression();
+				p.parse(object.getAsJsonObject("pointProgression"));
+				return p;
+			}
+			
+			public SeasonalArtifactProgression getPowerBonusProgression() {
+				SeasonalArtifactProgression p = new SeasonalArtifactProgression();
+				p.parse(object.getAsJsonObject("powerBonusProgression"));
+				return p;
+			}
+		}
+		
 		@Override
 		protected void parseData(JsonObject obj) {
 		}
@@ -280,6 +377,66 @@ public interface Profile {
 			return checklist.toArray(new CheckList[checklist.size()]);
 		}
 		
-		//TODO seasonal artifact
+		public SeasonalArtifact getSeasonalArtifact() {
+			SeasonalArtifact a = new SeasonalArtifact();
+			a.parse(data.getAsJsonObject("seasonalArtifact"));
+			return a;
+		}
+	}
+	
+	public class PlatformSilverComponent extends Component {
+
+		@Override
+		protected void parseData(JsonObject obj) {
+			
+		}
+		
+		/**@return null, if this recourse was accessed without an access token*/
+		public ItemComponent getPSNSilver() {
+			if(data == null) return null;
+			ItemComponent psn = new ItemComponent();
+			psn.parse(data.getAsJsonObject("platformSilver").getAsJsonObject("TigerPsn"));
+			return psn;
+		}
+		
+		/**@return null, if this recourse was accessed without an access token*/
+		public ItemComponent getXBOXSilver() {
+			if(data == null) return null;
+			ItemComponent psn = new ItemComponent();
+			psn.parse(data.getAsJsonObject("platformSilver").getAsJsonObject("TigerXbox"));
+			return psn;
+		}
+		
+		/**@return null, if this recourse was accessed without an access token*/
+		public ItemComponent getBlizzardSilver() {
+			if(data == null) return null;
+			ItemComponent psn = new ItemComponent();
+			psn.parse(data.getAsJsonObject("platformSilver").getAsJsonObject("TigerBlizzard"));
+			return psn;
+		}
+		
+		/**@return null, if this recourse was accessed without an access token*/
+		public ItemComponent getStadiaSilver() {
+			if(data == null) return null;
+			ItemComponent psn = new ItemComponent();
+			psn.parse(data.getAsJsonObject("platformSilver").getAsJsonObject("TigerStadia"));
+			return psn;
+		}
+		
+		/**@return null, if this recourse was accessed without an access token*/
+		public ItemComponent getSteamSilver() {
+			if(data == null) return null;
+			ItemComponent psn = new ItemComponent();
+			psn.parse(data.getAsJsonObject("platformSilver").getAsJsonObject("TigerSteam"));
+			return psn;
+		}
+		
+		/**@return null, if this recourse was accessed without an access token*/
+		public ItemComponent getBungieNextSilver() {
+			if(data == null) return null;
+			ItemComponent psn = new ItemComponent();
+			psn.parse(data.getAsJsonObject("platformSilver").getAsJsonObject("BungieNext"));
+			return psn;
+		}
 	}
 }
