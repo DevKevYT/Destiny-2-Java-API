@@ -22,6 +22,8 @@ public abstract class StaticDefinition extends DestinyEntity {
 	private boolean blacklisted;
 	private int index;
 	
+	public static final byte PROFILE_SCOPE = 0;
+	
 	public StaticDefinition(ManifestTables entityDefinition, long identifier) {
 		this.identifier = identifier;
 		this.entityDefinition = entityDefinition;
@@ -90,7 +92,7 @@ public abstract class StaticDefinition extends DestinyEntity {
 	
 	/**@return Display properties present in every definition and parsed into a more readable
 	 * format*/
-	public final DisplayProperties getDisplayProperties() {
+	public DisplayProperties getDisplayProperties() {
 		return displayProperties;
 	}
 	
@@ -105,5 +107,21 @@ public abstract class StaticDefinition extends DestinyEntity {
 				originalResponse.errorStatus, 
 				originalResponse.errorMessage, 
 				originalResponse.errorCode);
+	}
+	
+	protected boolean primitiveBoolean(String name) {
+		return optionalBoolean(getRawJson().getAsJsonPrimitive(name), false);
+	}
+	
+	protected int primitiveInteger(String name) {
+		return optionalInt(getRawJson().getAsJsonPrimitive(name), 0);
+	}
+	
+	protected long primitiveLong(String name) {
+		return optionalLong(getRawJson().getAsJsonPrimitive(name), 0);
+	}
+	
+	protected String primitiveString(String name) {
+		return optionalString(getRawJson().getAsJsonPrimitive(name), "");
 	}
 }

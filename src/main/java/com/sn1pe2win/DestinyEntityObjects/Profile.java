@@ -12,6 +12,9 @@ import com.sn1pe2win.core.DestinyDateFormat;
 import com.sn1pe2win.core.DestinyEntity;
 import com.sn1pe2win.core.Response;
 import com.sn1pe2win.definitions.DestinyChecklistDefinition;
+import com.sn1pe2win.definitions.DestinyClassDefinition;
+import com.sn1pe2win.definitions.DestinyGenderDefinition;
+import com.sn1pe2win.definitions.DestinyRaceDefinition;
 import com.sn1pe2win.definitions.MembershipType;
 
 public interface Profile {
@@ -23,7 +26,8 @@ public interface Profile {
 		PROFILE_INVENTORIES(102),
 		PROFILE_CURRENCIES(103),
 		PROFILE_PROGRESSION(104),
-		PLATFORM_SILVER(105);
+		PLATFORM_SILVER(105),
+		CHARACTERS(200);
 		
 		public final int components;
 		private ProfileSetType(int components) {
@@ -259,64 +263,6 @@ public interface Profile {
 		
 		public class SeasonalArtifact extends DestinyEntity {
 			
-			public class SeasonalArtifactProgression extends DestinyEntity {
-				JsonObject object;
-				@Override
-				public JsonObject getRawJson() {
-					return object;
-				}
-
-				@Override
-				public void parse(JsonObject object) {
-					this.object = object;
-				}
-				
-				//TODO get progression definition
-				public long getProgressionHash() {
-					return object.getAsJsonPrimitive("progressionHash").getAsLong();
-				}
-				
-				public int getDailyProgress() {
-					return object.getAsJsonPrimitive("dailyProgress").getAsInt();
-				}
-				
-				public int getDailyLimit() {
-					return object.getAsJsonPrimitive("dailyLimit").getAsInt();
-				}
-				
-				public int getWeeklyProgress() {
-					return object.getAsJsonPrimitive("weeklyProgress").getAsInt();
-				}
-				
-				public int getWeeklyLimit() {
-					return object.getAsJsonPrimitive("weeklyLimit").getAsInt();
-				}
-				
-				public int getCurrentProgress() {
-					return object.getAsJsonPrimitive("currentProgress").getAsInt();
-				}
-				
-				public int getLevel() {
-					return object.getAsJsonPrimitive("level").getAsInt();
-				}
-				
-				public int getLevelCap() {
-					return object.getAsJsonPrimitive("levelCap").getAsInt();
-				}
-				
-				public int getStepIndex() {
-					return object.getAsJsonPrimitive("stepIndex").getAsInt();
-				}
-				
-				public int getProgressToNextLevel() {
-					return object.getAsJsonPrimitive("progressToNextLevel").getAsInt();
-				}
-				
-				public int getNextLevelAt() {
-					return object.getAsJsonPrimitive("nextLevelAt").getAsInt();
-				}
-			}
-			
 			JsonObject object;
 			@Override
 			public JsonObject getRawJson() {
@@ -340,14 +286,14 @@ public interface Profile {
 				return object.getAsJsonPrimitive("powerBonus").getAsInt();
 			}
 			
-			public SeasonalArtifactProgression getPointProgression() {
-				SeasonalArtifactProgression p = new SeasonalArtifactProgression();
+			public LevelProgression getPointProgression() {
+				LevelProgression p = new LevelProgression();
 				p.parse(object.getAsJsonObject("pointProgression"));
 				return p;
 			}
 			
-			public SeasonalArtifactProgression getPowerBonusProgression() {
-				SeasonalArtifactProgression p = new SeasonalArtifactProgression();
+			public LevelProgression getPowerBonusProgression() {
+				LevelProgression p = new LevelProgression();
 				p.parse(object.getAsJsonObject("powerBonusProgression"));
 				return p;
 			}
@@ -437,6 +383,129 @@ public interface Profile {
 			ItemComponent psn = new ItemComponent();
 			psn.parse(data.getAsJsonObject("platformSilver").getAsJsonObject("BungieNext"));
 			return psn;
+		}
+	}
+	
+	public class CharacterComponent extends Component {
+		
+		private Character[] characters;
+		
+		public class Character extends DestinyEntity {
+			
+			private long characterId;
+			private JsonObject object;
+			
+			@Override
+			public JsonObject getRawJson() {
+				return object;
+			}
+
+			@Override
+			public void parse(JsonObject object) {
+				this.object = object;
+				
+			}
+			
+			public long getCharacterId() {
+				return characterId;
+			}
+			
+			public long getMembershipId() {
+				return object.getAsJsonPrimitive("membershipId").getAsLong();
+			}
+			
+			public MembershipType getMembershipType() {
+				return MembershipType.of(object.getAsJsonPrimitive("membershipType").getAsShort());
+			}
+			
+			public Date getDateLastPlayed() throws ParseException {
+				return DestinyDateFormat.toDate(object.getAsJsonPrimitive("characterId").getAsString());
+			}
+			
+			public int getMinutesPlayedLastSession() {
+				return object.getAsJsonPrimitive("minutesPlayedThisSession").getAsInt();
+			}
+			
+			public int getMinutesPlayedTotal() {
+				return object.getAsJsonPrimitive("minutesPlayedTotal").getAsInt();
+			}
+			
+			public int getLightLevel() {
+				return object.getAsJsonPrimitive("light").getAsInt();
+			}
+			
+			/**Stuff like discipline, strength, intellect etc.*/
+			public HashPair[] getStats() {
+				return HashPair.fromJsonObject(object.getAsJsonObject("stats"));
+			}
+			
+			@SuppressWarnings("unchecked")
+			public Response<DestinyRaceDefinition> getRace() {
+				return (Response<DestinyRaceDefinition>) new DestinyRaceDefinition(object.getAsJsonPrimitive("raceHash").getAsLong()).getAsResponse();
+			}
+			
+			@SuppressWarnings("unchecked")
+			public Response<DestinyGenderDefinition> getGender() {
+				return (Response<DestinyGenderDefinition>) new DestinyGenderDefinition(object.getAsJsonPrimitive("genderHash").getAsLong()).getAsResponse();
+			}
+			
+			@SuppressWarnings("unchecked")
+			public Response<DestinyClassDefinition> getClassType() {
+				return (Response<DestinyClassDefinition>) new DestinyClassDefinition(object.getAsJsonPrimitive("classHash").getAsLong()).getAsResponse();
+			}
+			
+			public String getEmblemPath() {
+				return object.getAsJsonPrimitive("emblemPath").getAsString();
+			}
+			
+			public String getEmblemBackground() {
+				return object.getAsJsonPrimitive("emblemBackgroundPath").getAsString();
+			}
+			
+			//TODO item hash
+			public long getEmblemItemHash() {
+				return object.getAsJsonPrimitive("emblemHash").getAsLong();
+			}
+			
+			public Color getEmblemColor() {
+				Color c = new Color();
+				c.parse(object.getAsJsonObject("emblemColor"));
+				return c;
+			}
+			
+			public LevelProgression getLevelProgression() {
+				return cast(object.getAsJsonObject("levelProgression"), LevelProgression.class);
+			}
+			
+			public int getBaseCharacterLevel() {
+				return object.getAsJsonPrimitive("baseCharacterLevel").getAsInt(); 
+			}
+			
+			public int getPercentToNextLevel() {
+				return object.getAsJsonPrimitive("percentToNextLevel").getAsInt(); 
+			}
+		}
+		
+		@Override
+		protected void parseData(JsonObject obj) {
+			REQUEST_TYPE = "Destiny2.GetProfile:Characters";
+		}
+		
+		public Character[] getCharacters() {
+			if(characters == null) {
+				Object[] set = data.entrySet().toArray();
+				characters = new Character[set.length];
+				
+				for(int i = 0; i < set.length; i++) {
+					@SuppressWarnings("unchecked")
+					Entry<String, JsonElement> entry = (Entry<String, JsonElement>) set[i];
+					
+					characters[i] = new Character();
+					characters[i].characterId = Long.valueOf(entry.getKey());
+					characters[i].parse(entry.getValue().getAsJsonObject());
+				}
+			}
+			return characters;
 		}
 	}
 }

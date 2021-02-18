@@ -1,8 +1,12 @@
 package com.sn1pe2win.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.sn1pe2win.DestinyEntityObjects.HashPair;
 
 /**This interface should get implemented by every class that represents an object that handles
  * responses.
@@ -33,6 +37,11 @@ public abstract class DestinyEntity {
 		else return value.getAsString();
 	}
 	
+	protected boolean optionalBoolean(JsonPrimitive value, boolean alternativeValue) {
+		if(value == null) return alternativeValue;
+		else return value.getAsBoolean();
+	}
+	
 	protected int[] optionalIntArray(JsonArray array, int[] alternativeValue) {
 		if(array == null) return alternativeValue;
 		else {
@@ -57,6 +66,53 @@ public abstract class DestinyEntity {
 			}
 			return constr;
 		}
+	}
+	
+	protected HashPair[] optionalHashPair(JsonObject object) {
+		if(object == null) return new HashPair[] {};
+		else return HashPair.fromJsonObject(object);
+	}
+	
+	public <T extends DestinyEntity> T cast(JsonObject object, Class<T> classToConvertTo) {
+		T type;
+		try {
+			type = classToConvertTo.newInstance();
+			((DestinyEntity) type).parse(object);
+			return type;
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public <T extends DestinyEntity> T optionalCast(JsonObject object, Class<T> classToConvertTo) {
+		if(object == null) return null;
+		else return cast(object, classToConvertTo);
+	}
+
+	/**Casts a jsonArray into a DestinyEntity list
+	 * @param <T>
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException */
+	public <T extends DestinyEntity> List<T> castArray(JsonArray array, Class<T> classToConvert) {
+		ArrayList<T> list = new ArrayList<T>(array.size());
+		for(int i = 0; i < array.size(); i++) {
+			T type;
+			try {
+				type = classToConvert.newInstance();
+				((DestinyEntity) type).parse(array.get(i).getAsJsonObject());
+				list.add(type);
+			} catch (InstantiationException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return list;
+	}
+	
+	public <T extends DestinyEntity> List<T> optionalCastArray(JsonArray array, Class<T> classToConvert) {
+		if(array == null) return new ArrayList<T>(); 
+		else return castArray(array, classToConvert);
 	}
 	
 	public String toString() {

@@ -3,6 +3,7 @@ package com.sn1pe2win.endpoints;
 import java.util.ArrayList;
 
 import com.google.gson.JsonObject;
+import com.sn1pe2win.DestinyEntityObjects.Profile.CharacterComponent;
 import com.sn1pe2win.DestinyEntityObjects.Profile.DestinyProfileComponent;
 import com.sn1pe2win.DestinyEntityObjects.Profile.PlatformSilverComponent;
 import com.sn1pe2win.DestinyEntityObjects.Profile.ProfileCurrenciesComponent;
@@ -28,6 +29,7 @@ public class GetProfile extends DestinyEntity {
 	private ProfileCurrenciesComponent profileCurrencies;
 	private ProfileProgressionComponent profileProgression;
 	private PlatformSilverComponent platformSilver;
+	private CharacterComponent characters;
 	
 	public GetProfile(MembershipType platform, long destinyMembershipid, ProfileSetType... loadType) {
 		this(null, platform, destinyMembershipid, loadType);
@@ -105,6 +107,13 @@ public class GetProfile extends DestinyEntity {
 			this.platformSilver.parse(platformSilver);
 		}
 		
+		JsonObject characters = object.getAsJsonObject("characters");
+		if(characters != null) {
+			newTypes.add(ProfileSetType.CHARACTERS);
+			this.characters = new CharacterComponent();
+			this.characters.parse(characters);
+		}
+		
 		components = newTypes.toArray(new ProfileSetType[newTypes.size()]);
 	}
 	
@@ -148,6 +157,13 @@ public class GetProfile extends DestinyEntity {
 	 * <br>Check with {@link GetProfile#hasComponent(ProfileSetType)}*/
 	public PlatformSilverComponent getPlatformSilver() {
 		return platformSilver;
+	}
+	
+	/**Returns a summary of all characters
+	 * @Nullable Not null, if the {@link GetProfile#components} contains {@link ProfileSetType#CHARACTERS}
+	 * <br>Check with {@link GetProfile#hasComponent(ProfileSetType)}*/
+	public CharacterComponent getCharacterComponent() {
+		return characters;
 	}
 	
 	public boolean hasComponent(ProfileSetType component) {

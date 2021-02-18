@@ -40,7 +40,31 @@ public enum ManifestTables {
 	
 	FactionDefinition("DestinyFactionDefinition"),
 	
-	ChecklistDefinition("DestinyChecklistDefinition");
+	ChecklistDefinition("DestinyChecklistDefinition"),
+	
+	VendorGroupDefinition("DestinyVendorGroupDefinition"),
+	
+	RewardSourceDefinition("DestinyRewardSourceDefinition"),
+	
+	ItemCategoryDefinition("DestinyItemCategoryDefinition"),
+	
+	DamageTypeDefinition("DestinyDamageTypeDefinition"),
+	
+	MedalTierDefinition("DestinyMedalTierDefinition"),
+	
+	AchievementDefinition("DestinyAchievementDefinition"),
+	
+	BondDefinition("DestinyBondDefinition"),
+	
+	CollectibleDefinition("DestinyCollectibleDefinition"),
+	
+	DestinationDefinition("DestinyDestinationDefinition"),
+	
+	EquipmentSlotDefinition("DestinyEquipmentSlotDefinition"),
+	
+	StatDefinition("DestinyStatDefinition"),
+	
+	InventoryItemDefinition("DestinyInventoryItemDefinition");
 	
 	public final String definitionName;
 	

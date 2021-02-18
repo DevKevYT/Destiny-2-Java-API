@@ -1,5 +1,10 @@
 package com.sn1pe2win.definitions;
 
+import java.util.ArrayList;
+
+import com.sn1pe2win.DestinyEntityObjects.FactionVendorInformation;
+import com.sn1pe2win.DestinyEntityObjects.HashPair;
+
 /**@uncomplete*/
 public class DestinyFactionDefinition extends StaticDefinition {
 	
@@ -16,16 +21,13 @@ public class DestinyFactionDefinition extends StaticDefinition {
 		//TODO Progressions
 	}
 	
-//	public TokenValue[] getTokenValues() {
-//		JsonArray jtokens = getRawData().getAsJsonArray("tokenValues");
-//		if(jtokens == null) return new TokenValue[0];
-//		TokenValue[] tokens = new TokenValue[jtokens.size()];
-//		
-//		for(int i = 0; i < tokens.length; i++) {
-//			tokens[i]  = new TokenValue(jtokens.get(i), jtokens.get(i).getAsJsonPrimitive().getAsInt());
-//		}
-//		
-//		return tokens;
-//		
-//	}
+	public HashPair[] getTokenValues() {
+		return optionalHashPair(getRawJson().getAsJsonObject("tokenValues"));
+	}
+	
+	public ArrayList<FactionVendorInformation> getVendors() {
+		return (ArrayList<FactionVendorInformation>) optionalCastArray(getRawJson().getAsJsonArray("vendors"), FactionVendorInformation.class);
+	}
+	//TODO definitions for hashes
+	
 }
