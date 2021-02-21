@@ -81,6 +81,10 @@ public class Gateway {
 		}
 	}
 	
+	public static Response<JsonObject> sendFullGet(String url) {
+		return sendFullGet(url, null);
+	}
+	
 	public static Response<JsonObject> sendFullGet(String fullURL, String accessToken) {
 		URL obj;
 		HttpURLConnection con;

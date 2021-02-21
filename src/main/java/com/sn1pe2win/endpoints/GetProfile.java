@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.google.gson.JsonObject;
 import com.sn1pe2win.DestinyEntityObjects.Profile.CharacterComponent;
+import com.sn1pe2win.DestinyEntityObjects.Profile.CharacterInventoryComponent;
 import com.sn1pe2win.DestinyEntityObjects.Profile.DestinyProfileComponent;
 import com.sn1pe2win.DestinyEntityObjects.Profile.PlatformSilverComponent;
 import com.sn1pe2win.DestinyEntityObjects.Profile.ProfileCurrenciesComponent;
@@ -30,6 +31,7 @@ public class GetProfile extends DestinyEntity {
 	private ProfileProgressionComponent profileProgression;
 	private PlatformSilverComponent platformSilver;
 	private CharacterComponent characters;
+	private CharacterInventoryComponent characterInventory;
 	
 	public GetProfile(MembershipType platform, long destinyMembershipid, ProfileSetType... loadType) {
 		this(null, platform, destinyMembershipid, loadType);
@@ -114,6 +116,13 @@ public class GetProfile extends DestinyEntity {
 			this.characters.parse(characters);
 		}
 		
+		JsonObject characterInventory = object.getAsJsonObject("characterInventories");
+		if(characterInventory != null) {
+			newTypes.add(ProfileSetType.CHARACTER_INVENTORY);
+			this.characterInventory = new CharacterInventoryComponent();
+			this.characterInventory.parse(characterInventory);
+		}
+		
 		components = newTypes.toArray(new ProfileSetType[newTypes.size()]);
 	}
 	
@@ -164,6 +173,13 @@ public class GetProfile extends DestinyEntity {
 	 * <br>Check with {@link GetProfile#hasComponent(ProfileSetType)}*/
 	public CharacterComponent getCharacterComponent() {
 		return characters;
+	}
+	
+	/**Returns all the items the character currently has. (Except vault)
+	 * @Nullable Not null, if the {@link GetProfile#components} contains {@link ProfileSetType#CHARACTERS}
+	 * <br>Check with {@link GetProfile#hasComponent(ProfileSetType)}*/
+	public CharacterInventoryComponent getCharacterInventories() {
+		return characterInventory;
 	}
 	
 	public boolean hasComponent(ProfileSetType component) {

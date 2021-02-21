@@ -1,14 +1,7 @@
 package com.sn1pe2win.main;
 
-import com.sn1pe2win.DestinyEntityObjects.Profile.ProfileSetType;
 import com.sn1pe2win.core.Gateway;
-import com.sn1pe2win.definitions.DestinyCollectibleDefinition;
-import com.sn1pe2win.definitions.DestinyDestinationDefinition;
-import com.sn1pe2win.definitions.DestinyInventoryItemDefinition;
-import com.sn1pe2win.definitions.DestinyItemCategoryDefinition;
-import com.sn1pe2win.definitions.MembershipType;
-import com.sn1pe2win.endpoints.GetProfile;
-import com.sn1pe2win.endpoints.SearchDestinyPlayer;
+import com.sn1pe2win.endpoints.GetPostGameCarnageReport;
 
 public class Main {
 
@@ -20,8 +13,8 @@ public class Main {
 //		System.out.println(profile.getCharacterComponent().getCharacters()[1].getLevelProgression().getCurrentProgress());
 //		DestinyFactionDefinition faction = new DestinyFactionDefinition(1838583129L);
 //		System.out.println(faction.getVendors().get(0).getDestinationHash());
-		DestinyInventoryItemDefinition i = new DestinyInventoryItemDefinition(13409814L);
-		System.out.println(i.getInventory().getExpiredInOrbitMessage());
+		GetPostGameCarnageReport g = new GetPostGameCarnageReport("8008632488");
+		System.out.println(g.getPlayers()[0].getStats().getDeaths());
 	}
 }
 //TODO talent grid definition

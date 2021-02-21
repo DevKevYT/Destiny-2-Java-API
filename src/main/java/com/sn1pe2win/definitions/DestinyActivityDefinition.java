@@ -21,22 +21,20 @@ public class DestinyActivityDefinition extends StaticDefinition {
 	
 	public DestinyActivityDefinition(long hash) {
 		super(ManifestTables.ActivityDefinition, hash);
-		
 		completionUnlockHash = getRawJson().getAsJsonPrimitive("completionUnlockHash").getAsLong();
+		
 		placeHash = getRawJson().getAsJsonPrimitive("placeHash").getAsLong();
 		destinationHash = getRawJson().getAsJsonPrimitive("destinationHash").getAsLong();
 		activityTypeHash = getRawJson().getAsJsonPrimitive("activityTypeHash").getAsLong();
-		directActivityModeHash = getRawJson().getAsJsonPrimitive("directActivityModeHash").getAsLong();
+		
+		directActivityModeHash = optionalLong(getRawJson().getAsJsonPrimitive("directActivityModeHash"), 0);
 		
 		JsonArray arr = getRawJson().getAsJsonArray("modifiers");
 		modifierHashes = new long[arr.size()];
 		for(int i = 0; i < modifierHashes.length; i++) 
 			modifierHashes[i] = arr.get(i).getAsJsonObject().getAsJsonPrimitive("activityModifierHash").getAsLong();
 		
-		arr = getRawJson().getAsJsonArray("activityModeHashes");
-		activityModeHashes = new long[arr.size()];
-		for(int i = 0; i < activityModeHashes.length; i++) 
-			activityModeHashes[i] = arr.get(i).getAsJsonPrimitive().getAsLong();
+		activityModeHashes = optionalLongArray(getRawJson().getAsJsonArray("activityModeHashes"), new long[] {});
 	}
 	
 	//To prevent unnessecary object creation

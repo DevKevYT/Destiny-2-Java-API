@@ -8,6 +8,11 @@ import com.sn1pe2win.core.Response;
 
 public class DestinyInventoryItemDefinition extends StaticDefinition {
 
+	public static final int BIND_STATUS_NOT_BOUND = 0;
+	
+	public static final int LOCATION_INVENTORY = 1;
+	
+	
 	public DestinyInventoryItemDefinition(long identifier) {
 		super(ManifestTables.InventoryItemDefinition, identifier);
 	}

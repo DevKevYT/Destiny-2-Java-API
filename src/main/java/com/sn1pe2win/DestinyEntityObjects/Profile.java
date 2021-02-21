@@ -3,6 +3,7 @@ package com.sn1pe2win.DestinyEntityObjects;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map.Entry;
 
 import com.google.gson.JsonArray;
@@ -16,10 +17,12 @@ import com.sn1pe2win.definitions.DestinyClassDefinition;
 import com.sn1pe2win.definitions.DestinyGenderDefinition;
 import com.sn1pe2win.definitions.DestinyRaceDefinition;
 import com.sn1pe2win.definitions.MembershipType;
+import com.sn1pe2win.endpoints.GetActivityHistory;
 
 public interface Profile {
 	
 	public enum ProfileSetType {
+		
 		NONE(0), 
 		PROFILES(100), 
 		VENDOR_RECEIPTS(101),
@@ -27,7 +30,8 @@ public interface Profile {
 		PROFILE_CURRENCIES(103),
 		PROFILE_PROGRESSION(104),
 		PLATFORM_SILVER(105),
-		CHARACTERS(200);
+		CHARACTERS(200),
+		CHARACTER_INVENTORY(201);
 		
 		public final int components;
 		private ProfileSetType(int components) {
@@ -150,6 +154,15 @@ public interface Profile {
 
 		public int getCurrentSeasonRewardPowerCap() {
 			return optionalInt(object.getAsJsonPrimitive("currentSeasonRewardPowerCap"), 0);
+		}
+		
+		/**@param activityType - The activity type enum.
+		 * @param count - The amount of entries to load.
+		 * @see GetActivityHistory#getCharacterActivityHistory(int, int, MembershipType, long, long...)
+		 * @see Profile.CharacterComponent.Character#getCharacterHistory(int, int)
+		 * @return The last activities from any character. If you want to handle single characters, use The function below*/
+		public Response<PlayerActivity[]> getActivityHistory(int activityType, int count) {
+			return GetActivityHistory.getCharacterActivityHistory(activityType, count, getUserInfo().getMembershipType(), getUserInfo().getMembershipId(), getCharacterIds());
 		}
 	}
 	
@@ -406,6 +419,10 @@ public interface Profile {
 				
 			}
 			
+			public Response<PlayerActivity[]> getCharacterHistory(int activityType, int count) {
+				return GetActivityHistory.getCharacterActivityHistory(activityType, count, getMembershipType(), getMembershipId(), characterId);
+			}
+			
 			public long getCharacterId() {
 				return characterId;
 			}
@@ -506,6 +523,54 @@ public interface Profile {
 				}
 			}
 			return characters;
+		}
+	}
+	
+	public class CharacterInventoryComponent extends Component {
+
+		public class CharacterInventory extends DestinyEntity {
+
+			JsonObject object;
+			private long characterId = 0;
+			
+			@Override
+			public JsonObject getRawJson() {
+				return object;
+			}
+
+			@Override
+			public void parse(JsonObject object) {
+				this.object = object;
+			}
+			
+			public long getCharacterId() {
+				return characterId;
+			}
+			
+			public InventoryItem[] getItems() {
+				List<InventoryItem> l = castArray(object.getAsJsonArray("items"), InventoryItem.class);
+				return l.toArray(new InventoryItem[l.size()]);
+			}
+		}
+		
+		@Override
+		protected void parseData(JsonObject obj) {
+			REQUEST_TYPE = "Destiny2.GetProfile:CharacterInventories";
+		}
+		
+		public CharacterInventory[] getCharacters() {
+			Object[] set = data.entrySet().toArray();
+			CharacterInventory[] inv = new CharacterInventory[set.length];
+			
+			for(int i = 0; i < set.length; i++) {
+				@SuppressWarnings("unchecked")
+				Entry<String, JsonElement> entry = (Entry<String, JsonElement>) set[i];
+				
+				inv[i] = new CharacterInventory();
+				inv[i].characterId = Long.valueOf(entry.getKey());
+				inv[i].parse(entry.getValue().getAsJsonObject());
+			}
+			return inv;
 		}
 	}
 }
