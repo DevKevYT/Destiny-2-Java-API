@@ -19,6 +19,20 @@ public class DestinyActivityDefinition extends StaticDefinition {
 	public final long[] modifierHashes;
 	public final long[] activityModeHashes;
 	
+	/**Alle Namen klassifizierter Raids. Es wird sich bewusst nicht auf die Id's bezogen, da verschieden gewertete Aktivitäten gen gleichen
+	 * namen tragen und sie somit verschieden gewertet werden*/
+	public static final String[] CLASSIFIED_RAID = new String[] {
+			"Scourge of the Past",
+			"Leviathan, Eater of Worlds: Normal",
+			"Leviathan, Spire of Stars: Normal",
+			"Leviathan: Normal",
+			"Crown of Sorrow: Normal",
+			"Leviathan: Prestige",
+			"Leviathan, Spire of Stars: Prestige",
+			"Leviathan, Eater of Worlds: Prestige",
+			"Leviathan, Eater of Worlds"
+	};
+	
 	public DestinyActivityDefinition(long hash) {
 		super(ManifestTables.ActivityDefinition, hash);
 		completionUnlockHash = getRawJson().getAsJsonPrimitive("completionUnlockHash").getAsLong();
@@ -153,6 +167,13 @@ public class DestinyActivityDefinition extends StaticDefinition {
 	@SuppressWarnings("unchecked")
 	public Response<DestinyActivityTypeDefinition> getActivityType() {
 		return (Response<DestinyActivityTypeDefinition>) new DestinyActivityTypeDefinition(activityTypeHash).getAsResponse();
+	}
+	
+	public boolean isClassifiedRaid() {
+		for(String s : CLASSIFIED_RAID) {
+			if(getDisplayProperties().getName().equals(s)) return true;
+		}
+		return false;
 	}
 	
 	//TODO challenges

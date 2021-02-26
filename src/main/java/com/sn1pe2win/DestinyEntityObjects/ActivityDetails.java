@@ -50,4 +50,11 @@ public class ActivityDetails extends DestinyEntity {
 	public MembershipType getMembershipType() {
 		return MembershipType.of(object.getAsJsonPrimitive("membershipType").getAsShort());
 	}
+	
+	public boolean isMode(int mode) {
+		for(int m : getModes()) {
+			if(m == mode) return true;
+		}
+		return false;
+	}
 }

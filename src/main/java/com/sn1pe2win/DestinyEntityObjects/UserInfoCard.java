@@ -1,7 +1,6 @@
 package com.sn1pe2win.DestinyEntityObjects;
 
 import com.google.gson.JsonObject;
-import com.sn1pe2win.DestinyEntityObjects.Profile.ProfileSetType;
 import com.sn1pe2win.core.DestinyEntity;
 import com.sn1pe2win.definitions.MembershipType;
 import com.sn1pe2win.endpoints.GetProfile;
@@ -50,13 +49,13 @@ public class UserInfoCard extends DestinyEntity {
 		return displayName;
 	}
 
-	public GetProfile loadProfile(ProfileSetType... components) {
-		GetProfile getProfile = new GetProfile(membershipType, membershipId, components);
+	public GetProfile loadProfile() {
+		GetProfile getProfile = new GetProfile(membershipType, membershipId);
 		return getProfile;
 	}
 	
-	public GetProfile loadProfile(String accessToken, ProfileSetType... components) {
-		GetProfile getProfile = new GetProfile(accessToken, membershipType, membershipId, components);
+	public GetProfile loadProfile(String accessToken) {
+		GetProfile getProfile = new GetProfile(accessToken, membershipType, membershipId);
 		return getProfile;
 	}
 }

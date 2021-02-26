@@ -95,6 +95,8 @@ public abstract class DestinyEntity {
 	 * @throws IllegalAccessException 
 	 * @throws InstantiationException */
 	public <T extends DestinyEntity> List<T> castArray(JsonArray array, Class<T> classToConvert) {
+		if(array == null) return new ArrayList<T>();
+		
 		ArrayList<T> list = new ArrayList<T>(array.size());
 		for(int i = 0; i < array.size(); i++) {
 			T type;

@@ -33,7 +33,7 @@ public class GetActivityHistory {
 				if(activities != null) { //keine aktivität für spieler gefunden
 					for(int j = 0; j < activities.size(); j++) {
 						PlayerActivity a = new PlayerActivity();
-						a.parse(activities.get(i).getAsJsonObject());
+						a.parse(activities.get(j).getAsJsonObject());
 						history.add(a);
 						loadedPerCharacter++;
 						if(loadedPerCharacter == count) break pager;

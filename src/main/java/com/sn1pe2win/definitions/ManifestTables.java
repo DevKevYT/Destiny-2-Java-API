@@ -64,7 +64,15 @@ public enum ManifestTables {
 	
 	StatDefinition("DestinyStatDefinition"),
 	
-	InventoryItemDefinition("DestinyInventoryItemDefinition");
+	InventoryItemDefinition("DestinyInventoryItemDefinition"),
+	
+	MilestoneDefinition("DestinyMilestoneDefinition"),
+	
+	ItemTierTypeDefinition("DestinyItemTierTypeDefinition"),
+	
+	LocationDefinition("DestinyLocationDefinition"),
+	
+	LoreDefinition("DestinyLoreDefinition");
 	
 	public final String definitionName;
 	

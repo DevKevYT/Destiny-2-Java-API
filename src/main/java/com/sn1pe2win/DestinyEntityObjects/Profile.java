@@ -12,11 +12,14 @@ import com.google.gson.JsonObject;
 import com.sn1pe2win.core.DestinyDateFormat;
 import com.sn1pe2win.core.DestinyEntity;
 import com.sn1pe2win.core.Response;
+import com.sn1pe2win.definitions.DestinyActivityDefinition;
+import com.sn1pe2win.definitions.DestinyActivityModeDefinition;
 import com.sn1pe2win.definitions.DestinyChecklistDefinition;
 import com.sn1pe2win.definitions.DestinyClassDefinition;
 import com.sn1pe2win.definitions.DestinyGenderDefinition;
 import com.sn1pe2win.definitions.DestinyRaceDefinition;
 import com.sn1pe2win.definitions.MembershipType;
+import com.sn1pe2win.definitions.OptionalValue;
 import com.sn1pe2win.endpoints.GetActivityHistory;
 
 public interface Profile {
@@ -31,7 +34,8 @@ public interface Profile {
 		PROFILE_PROGRESSION(104),
 		PLATFORM_SILVER(105),
 		CHARACTERS(200),
-		CHARACTER_INVENTORY(201);
+		CHARACTER_INVENTORY(201),
+		CHARACTER_ACTIVITIES(204);
 		
 		public final int components;
 		private ProfileSetType(int components) {
@@ -436,7 +440,7 @@ public interface Profile {
 			}
 			
 			public Date getDateLastPlayed() throws ParseException {
-				return DestinyDateFormat.toDate(object.getAsJsonPrimitive("characterId").getAsString());
+				return DestinyDateFormat.toDate(object.getAsJsonPrimitive("dateLastPlayed").getAsString());
 			}
 			
 			public int getMinutesPlayedLastSession() {
@@ -571,6 +575,98 @@ public interface Profile {
 				inv[i].parse(entry.getValue().getAsJsonObject());
 			}
 			return inv;
+		}
+	}
+	
+	public class CharacterActivitiesComponent extends Component {
+		
+		public class CharacterActivity extends DestinyEntity {
+			
+			JsonObject object;
+			private long characterId;
+			
+			@Override
+			public JsonObject getRawJson() {
+				return object;
+			}
+
+			@Override
+			public void parse(JsonObject object) {
+				this.object = object;
+			}
+			
+			public long getCharacterId() {
+				return characterId;
+			}
+			
+			public Date getDateActivityStarted() {
+				try {
+					return DestinyDateFormat.toDate(object.getAsJsonPrimitive("dateActivityStarted").getAsString());
+				} catch (ParseException e) {
+					e.printStackTrace();
+					return new Date();
+				}
+			}
+			
+			public AvailableActivities[] getAvailableActivities() {
+				List<AvailableActivities> l = castArray(object.getAsJsonArray("availableActivities"), AvailableActivities.class);
+				return l.toArray(new AvailableActivities[l.size()]);
+			}
+			
+			public long getCurrentActivityHash() {
+				return object.getAsJsonPrimitive("currentActivityHash").getAsLong();
+			}
+			
+			@SuppressWarnings("unchecked")
+			public Response<DestinyActivityDefinition> getCurrentActivity() {
+				return (Response<DestinyActivityDefinition>) new DestinyActivityDefinition(getCurrentActivityHash()).getAsResponse();
+			}
+			
+			public long getActivityModeHash() {
+				return object.getAsJsonPrimitive("currentActivityModeHash").getAsLong();
+			}
+			
+			/**Optional, since the "Orbit" has no mode for some reason. The hash exists anyway, pointing nowhere*/
+			@SuppressWarnings("unchecked")
+			@OptionalValue
+			public Response<DestinyActivityModeDefinition> getActivityMode() {
+				return (Response<DestinyActivityModeDefinition>) new DestinyActivityModeDefinition(getActivityModeHash()).getAsResponse();
+			}
+			
+			public long getCurrentPlaylistActivityHash() {
+				return object.getAsJsonPrimitive("currentPlaylistActivityHash").getAsLong();
+			}
+			
+			@SuppressWarnings("unchecked")
+			public Response<DestinyActivityDefinition> getCurrentPlaylist() {
+				return (Response<DestinyActivityDefinition>) new DestinyActivityDefinition(getCurrentPlaylistActivityHash()).getAsResponse();
+			}
+		}
+
+		@Override
+		protected void parseData(JsonObject obj) {
+		}
+		
+		public CharacterActivity[] getCharacters() {
+			Object[] set = data.entrySet().toArray();
+			CharacterActivity[] inv = new CharacterActivity[set.length];
+			
+			for(int i = 0; i < set.length; i++) {
+				@SuppressWarnings("unchecked")
+				Entry<String, JsonElement> entry = (Entry<String, JsonElement>) set[i];
+				
+				inv[i] = new CharacterActivity();
+				inv[i].characterId = Long.valueOf(entry.getKey());
+				inv[i].parse(entry.getValue().getAsJsonObject());
+			}
+			return inv;
+		}
+
+		public CharacterActivity getCharacter(long characterId) {
+			for(CharacterActivity a : getCharacters()) {
+				if(a.getCharacterId() == characterId) return a;
+			}
+			return null;
 		}
 	}
 }
