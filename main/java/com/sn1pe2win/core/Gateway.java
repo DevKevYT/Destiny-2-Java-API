@@ -116,7 +116,6 @@ public class Gateway {
 			lastResponse = new Response<JsonObject>(null, responseCode, (responseCode == 404 ? "Endpoint not found: " : ""), "", 0);
 			return lastResponse;
 		}
-		System.out.println(responseCollector.toString());
 		JsonObject response;
 		try {
 			response = (JsonObject) JsonParser.parseString(responseCollector.toString());

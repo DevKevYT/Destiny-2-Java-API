@@ -8,6 +8,7 @@ import com.sn1pe2win.DestinyEntityObjects.Profile.CharacterComponent;
 import com.sn1pe2win.DestinyEntityObjects.Profile.CharacterInventoryComponent;
 import com.sn1pe2win.DestinyEntityObjects.Profile.CollectibleComponent;
 import com.sn1pe2win.DestinyEntityObjects.Profile.DestinyProfileComponent;
+import com.sn1pe2win.DestinyEntityObjects.Profile.ItemObjectives;
 import com.sn1pe2win.DestinyEntityObjects.Profile.MetricsComponent;
 import com.sn1pe2win.DestinyEntityObjects.Profile.PlatformSilverComponent;
 import com.sn1pe2win.DestinyEntityObjects.Profile.ProfileCurrenciesComponent;
@@ -68,51 +69,6 @@ public class GetProfile extends DestinyEntity {
 
 	@Override
 	public void parse(JsonObject object) {
-
-		
-//		JsonObject profileInventories = object.getAsJsonObject("profileInventory");
-//		if(profileInventories != null) {
-//			newTypes.add(ProfileSetType.PROFILE_INVENTORIES);
-//			this.profileInventories = new ProfileInventories();
-//			this.profileInventories.parse(profileInventories);
-//		}
-//		
-//		JsonObject profileCurrencies = object.getAsJsonObject("profileCurrencies");
-//		if(profileCurrencies != null) {
-//			newTypes.add(ProfileSetType.PROFILE_CURRENCIES);
-//			this.profileCurrencies = new ProfileCurrenciesComponent();
-//			this.profileCurrencies.parse(profileCurrencies);
-//		}
-//		
-//		JsonObject profileProgression = object.getAsJsonObject("profileProgression");
-//		if(profileProgression != null) {
-//			newTypes.add(ProfileSetType.PROFILE_PROGRESSION);
-//			this.profileProgression = new ProfileProgressionComponent();
-//			this.profileProgression.parse(profileProgression);
-//		}
-//		
-//		JsonObject platformSilver = object.getAsJsonObject("platformSilver");
-//		if(platformSilver != null) {
-//			newTypes.add(ProfileSetType.PLATFORM_SILVER);
-//			this.platformSilver = new PlatformSilverComponent();
-//			this.platformSilver.parse(platformSilver);
-//		}
-//		
-//		JsonObject characters = object.getAsJsonObject("characters");
-//		if(characters != null) {
-//			newTypes.add(ProfileSetType.CHARACTERS);
-//			this.characters = new CharacterComponent();
-//			this.characters.parse(characters);
-//		}
-//		
-//		JsonObject characterInventory = object.getAsJsonObject("characterInventories");
-//		if(characterInventory != null) {
-//			newTypes.add(ProfileSetType.CHARACTER_INVENTORY);
-//			this.characterInventory = new CharacterInventoryComponent();
-//			this.characterInventory.parse(characterInventory);
-//		}
-//		
-//		components = newTypes.toArray(new ProfileSetType[newTypes.size()]);
 	}
 	
 	/**Profiles is the most basic component, only relevant when calling GetProfile. This returns basic information about the profile, which is almost nothing: a list of characterIds, some information about the last time you logged in, and that most sobering statistic: how long you've played.
@@ -222,6 +178,13 @@ public class GetProfile extends DestinyEntity {
 		Response<JsonObject> obj = Gateway.sendGet("/Destiny2/" + platform.id +  "/Profile/"  + getDestinyMembershipId()  + "/?components=" + ProfileSetType.PROFILE_METRICS.components, accessToken);
 		if(obj.success()) c.parse(obj.getResponseData().getAsJsonObject("Response").getAsJsonObject("metrics"));
 		return new Response<MetricsComponent>(c, obj.httpStatus, obj.errorStatus, obj.errorMessage, obj.errorCode);
+	}
+	
+	public Response<ItemObjectives> getItemObjectives() {
+		ItemObjectives c = new ItemObjectives();
+		Response<JsonObject> obj = Gateway.sendGet("/Destiny2/" + platform.id +  "/Profile/"  + getDestinyMembershipId()  + "/?components=" + ProfileSetType.ITEM_OBJECTIVES.components, accessToken);
+		if(obj.success()) c.parse(obj.getResponseData().getAsJsonObject("Response"));
+		return new Response<ItemObjectives>(c, obj.httpStatus, obj.errorStatus, obj.errorMessage, obj.errorCode);
 	}
 	
 	public boolean hasComponent(ProfileSetType component) {

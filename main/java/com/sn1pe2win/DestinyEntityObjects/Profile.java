@@ -38,6 +38,7 @@ public interface Profile {
 		CHARACTER_ACTIVITIES(204),
 		PROFILE_RECORDS(900),
 		COLLECTIBLES(800),
+		ITEM_OBJECTIVES(301),
 		PROFILE_METRICS(1100);
 		
 		public final int components;
@@ -820,40 +821,40 @@ public interface Profile {
 		//TODO Character Triumphs
 	}
 	
+	public class ObjectiveProgress extends DestinyEntity {
+		
+		JsonObject object;
+		
+		@Override
+		public JsonObject getRawJson() {
+			return object;
+		}
+
+		@Override
+		public void parse(JsonObject object) {
+			this.object = object;
+		}
+		
+		public long getObjectiveHash() {
+			return object.getAsJsonPrimitive("objectiveHash").getAsLong();
+		}
+		
+		public int getProgress() {
+			return object.getAsJsonPrimitive("progress").getAsInt();
+		}
+		
+		public int getCompletionValue() {
+			return object.getAsJsonPrimitive("completionValue").getAsInt();
+		}
+		
+		public boolean isCompleted() {
+			return object.getAsJsonObject("complete").getAsBoolean();
+		}
+	}
+	
 	public class MetricsComponent extends Component {
 
 		public class MetricsEntry extends DestinyEntity {
-			
-			public class MetricObjectiveProgress extends DestinyEntity {
-				
-				JsonObject object;
-				
-				@Override
-				public JsonObject getRawJson() {
-					return object;
-				}
-
-				@Override
-				public void parse(JsonObject object) {
-					this.object = object;
-				}
-				
-				public long getObjectiveHash() {
-					return object.getAsJsonPrimitive("objectiveHash").getAsLong();
-				}
-				
-				public int getProgress() {
-					return object.getAsJsonPrimitive("progress").getAsInt();
-				}
-				
-				public int getCompletionValue() {
-					return object.getAsJsonPrimitive("completionValue").getAsInt();
-				}
-				
-				public boolean isCompleted() {
-					return object.getAsJsonObject("complete").getAsBoolean();
-				}
-			}
 			
 			JsonObject object;
 			public long metricsHash;
@@ -872,8 +873,8 @@ public interface Profile {
 				return object.getAsJsonPrimitive("invisible").getAsBoolean() == false;
 			}
 			
-			public MetricObjectiveProgress getObjectiveProgress() {
-				MetricObjectiveProgress o = new MetricObjectiveProgress();
+			public ObjectiveProgress getObjectiveProgress() {
+				ObjectiveProgress o = new ObjectiveProgress();
 				o.parse(object.getAsJsonObject("objectiveProgress"));
 				return o;
 			}
@@ -1096,5 +1097,100 @@ public interface Profile {
 			return inv;
 		}
 		//TODO Character collectibles
+	}
+	
+	/**Current Character objectives inside the inventory
+	 * Does not extend componend, cause this is a special occurrence*/
+	public class ItemObjectives extends DestinyEntity {
+
+		JsonObject object;
+		JsonObject uninstanced;
+		
+		public class CharacterItemObjectives extends Component {
+
+			public class CharacterItemObjective extends DestinyEntity {
+
+				JsonObject object;
+				long objectiveHash;
+				
+				@Override
+				public JsonObject getRawJson() {
+					return object;
+				}
+
+				@Override
+				public void parse(JsonObject object) {
+					this.object = object;
+				}
+				
+				public ObjectiveProgress[] getObjectives() {
+					List<ObjectiveProgress> arr = castArray(object.getAsJsonArray("objectives"), ObjectiveProgress.class);
+					return arr.toArray(new ObjectiveProgress[arr.size()]);
+				}
+			}
+			
+			long characterId;
+			JsonObject object;
+			
+			@Override
+			protected void parseData(JsonObject obj) {
+			}
+			
+			public CharacterItemObjective getObjective(long objectiveHash) {
+				CharacterItemObjective i = new CharacterItemObjective();
+				i.parse(data.getAsJsonObject(String.valueOf(objectiveHash)));
+				i.objectiveHash = objectiveHash;
+				return i;
+			}
+			 
+		}
+		
+		public CharacterItemObjectives[] getCharacterItemObjectives() {
+			Object[] set = uninstanced.entrySet().toArray();
+			CharacterItemObjectives[] inv = new CharacterItemObjectives[set.length];
+			
+			for(int i = 0; i < set.length; i++) {
+				@SuppressWarnings("unchecked")
+				Entry<String, JsonElement> entry = (Entry<String, JsonElement>) set[i];
+				
+				inv[i] = new CharacterItemObjectives();
+				inv[i].characterId = Long.valueOf(entry.getKey());
+				inv[i].parse(entry.getValue().getAsJsonObject().getAsJsonObject("objectives"));
+			}
+			return inv;
+		}
+		
+		public CharacterItemObjectives getCharacterItemObjectives(long characterId) {
+			Object[] set = uninstanced.entrySet().toArray();
+			
+			for(int i = 0; i < set.length; i++) {
+				@SuppressWarnings("unchecked")
+				Entry<String, JsonElement> entry = (Entry<String, JsonElement>) set[i];
+				if(characterId == Long.valueOf(entry.getKey())) {
+					
+					CharacterItemObjectives co = new CharacterItemObjectives();
+					co.characterId = characterId;
+					co.parse(entry.getValue().getAsJsonObject().getAsJsonObject("objectives"));
+					return co;
+				}
+			}
+			return null;
+		}
+
+
+		@Override
+		public JsonObject getRawJson() {
+			return object;
+		}
+
+
+		@Override
+		/**Just pass the response here*/
+		public void parse(JsonObject object) {
+			this.object = object;
+			uninstanced = object.getAsJsonObject("characterUninstancedItemComponents");
+		}
+		
+		//TODO handle itemComponents (Usually private)
 	}
 }
